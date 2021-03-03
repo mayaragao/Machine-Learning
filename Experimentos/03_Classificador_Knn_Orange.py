@@ -10,6 +10,15 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors     import KNeighborsClassifier
 from sklearn.preprocessing import LabelBinarizer, MinMaxScaler
 
+####################################################################
+# Experimento 04 - VALIDAÇÃO CRUZADA
+#####################################################################
+
+from sklearn.model_selection import train_test_split, cross_val_score
+
+#--------------------------------------------------------------------
+# Ler o arquivo CSV com os dados do conjunto IRIS
+#--------------------------------------------------------------------
 
 dados = pd.read_csv('Orange_Telecom_Churn_Data.csv')
 
@@ -139,7 +148,7 @@ dados = dados[atributos_selecionados]
 # de treino e de teste esteja isento de qualquer viés de seleção.
 #------------------------------------------------------------------------
 
-dados_embaralhados = dados.sample(frac=1, random_state=12345)
+dados_embaralhados = dados.sample(frac=1, random_state=12344)
 
 #-------------------------------------------------------------------------
 # Criar os arrays X e Y separando os atributos e o alvo
@@ -153,17 +162,33 @@ y = dados_embaralhados.loc[:,dados_embaralhados.columns == 'churned'].values
 # Separa X e Y em conjunto de treino e conjunto de teste
 #-------------------------------------------------------------------------
 
-q = 4000 # qtd de amostras selecionadas para treinamento
+
+# q = 4000 # qtd de amostras selecionadas para treinamento
 
 
-x_treino = x[:q,:]
-y_treino = y[:q].ravel() 
-# método .ravel usado para ajustar as dimensoes que estavam diferentes
+# x_treino = x[:q,:]
+# y_treino = y[:q].ravel() 
+
+#  método .ravel usado para ajustar as dimensoes que estavam diferentes
 
 
-x_teste = x[q:,:]
-y_teste = y[q:].ravel()
+# x_teste = x[q:,:]
+# y_teste = y[q:].ravel()
 
+#-------------------------------------------------------------------------
+# Experimento 04 -> fazendo o split dos dados:
+#-------------------------------------------------------------------------
+
+# train test split desempenha mesma funcao que feita manualmente acima
+x_treino, x_teste, y_treino, y_teste = train_test_split(
+    x,
+    y.ravel(),
+    train_size=4000, # separando 4000 amostras para treinamento
+    random_state=777,
+    shuffle=True, # embaralha o conjunto de dados
+    # shuffle=False, # nao embarallha os dados, no caso novamente, pois ja estao embaralhados em x e em y.
+    # test_size=0.33, # separando 1/3 para ser de teste
+    )
 
 
 #-------------------------------------------------------------------------
@@ -235,7 +260,7 @@ print(' Acurácia = %.1f %%' %(100*acuracia))
 print('\n Variação da acurácia, sendo K o nº de vizinhos')
 print('\n  K  TREINO  TESTE ')
 print(' --  ------  -----')
-for k in range(1,50,2): # de 2 em 2 unidades
+for k in range(1,26,2): # de 2 em 2 unidades
     
     classificador = KNeighborsClassifier(
         n_neighbors = k,
@@ -257,4 +282,31 @@ for k in range(1,50,2): # de 2 em 2 unidades
         "%3d"%k,
         "%6.1f" %(100*acuracia_treino),
         "%6.1f" %(100*acuracia_teste)
+        )
+    
+#-------------------------------------------------------------------------
+# Verificar a variação da acurácia com o número de vizinhos 
+# usando VALIDAÇÃO CRUZADA
+#-------------------------------------------------------------------------
+
+
+print('\n Variação da acurácia, UTILIZANDO VALIDAÇÃO CRUZADA:')
+
+for k in range(1,26,2):
+    # instanciando o classificador:
+    classificador = KNeighborsClassifier(
+        n_neighbors = k,
+        weights = 'distance', 
+        p = 1 
+        )
+    
+    scores = cross_val_score(classificador,
+                    x,
+                    y.ravel(),
+                    cv=8,
+                    )
+    print(
+        'k = %2d' % k,
+        'scores =', scores,
+        'acurácia média = %6.1f' % (100*sum(scores)/8)
         )
