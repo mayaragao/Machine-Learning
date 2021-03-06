@@ -136,8 +136,8 @@ print(' ')
 print(' REGRESSOR POLINOMIAL DE GRAU K')
 print(' ')
 
-print('  K    DENTRO da amostra   FORA da amostra ')
-print(' ---   -----------------   --------------- ')
+print('  K    Nº at   DENTRO da amostra   FORA da amostra ')
+print(' ---   -----   -----------------   --------------- ')
 
 for k in range(1,6):
     
@@ -161,8 +161,9 @@ for k in range(1,6):
     rmse_out = math.sqrt(mse_out)
     r2_out = r2_score(y_teste, y_resposta_teste)
 
-    
+    n_atributos = x_treino_poly.shape[1]    
 
-    print(' %3d   %17.4f   %15.4f ' % ( k , rmse_in, rmse_out) ) 
+    print(' %3d   %5d   %17.4f   %15.4f ' % ( k , n_atributos, rmse_in, rmse_out) ) 
 
-print('\n Ou seja, para uma regressao de grau 2, o modelo é melhor ajustado, contudo, para grau maior que 2, o modelo está em overfitting.') 
+print('\n Ou seja, para uma regressao de grau 2, o modelo é melhor ajustado, contudo, para grau maior que 2, o modelo está em overfitting, pois tem poucas amostras para aperfeçoar o modelo.') 
+
